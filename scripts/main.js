@@ -44,6 +44,12 @@ function urlB64ToUint8Array(base64String) {
   return outputArray;
 }
 
+navigator.serviceWorker.register("sw.js").then(function (swReg) {
+  console.log("Service Worker is registered", swReg);
+  swRegistration = swReg;
+  initializeUI();
+});
+
 function initializeUI() {
   // Set the initial subscription value
   pushButton.addEventListener("click", () => {
@@ -58,25 +64,6 @@ function initializeUI() {
     updateBtn();
   });
 }
-
-function updateBtn() {
-  if (Notification.permission === "denied") {
-    pushButton.textContent = "Push Messaging Blocked";
-    pushButton.disabled = true;
-    updateSubscriptionOnServer(null);
-    return;
-  }
-  if (isSubscribed) pushButton.textContent = "Disable Push Messaging";
-  else pushButton.textContent = "Enable Push Messaging";
-  pushButton.disabled = false;
-}
-
-navigator.serviceWorker.register("sw.js").then(function (swReg) {
-  console.log("Service Worker is registered", swReg);
-
-  swRegistration = swReg;
-  initializeUI();
-});
 
 function subscribeUser() {
   const applicationServerKey = urlB64ToUint8Array(applicationServerPublicKey);
@@ -100,9 +87,20 @@ function subscribeUser() {
     });
 }
 
+function updateBtn() {
+  if (Notification.permission === "denied") {
+    pushButton.textContent = "Push Messaging Blocked";
+    pushButton.disabled = true;
+    updateSubscriptionOnServer(null);
+    return;
+  }
+  if (isSubscribed) pushButton.textContent = "Disable Push Messaging";
+  else pushButton.textContent = "Enable Push Messaging";
+  pushButton.disabled = false;
+}
+
 function updateSubscriptionOnServer(subscription) {
   // TODO: Send subscription to application server
-
   const subscriptionJson = document.querySelector(".js-subscription-json");
   const subscriptionDetails = document.querySelector(
     ".js-subscription-details"
